@@ -9,7 +9,6 @@
                     <li class="submenu">
                             <img src="assets/img/cart.png" width="35" height="35" id="img-carrito">
                             <div id="carrito">
-                                    
                                     <table id="lista-carrito" class="u-full-width">
                                         <thead>
                                             <tr>
@@ -20,12 +19,31 @@
                                                 <th></th>
                                             </tr>
                                         </thead>
-                                        <tbody></tbody>
+                                        <tbody>
+                                            <tr *ngFor="let combo of articulosCarrito">
+                                                <td>
+                                                  <img [src]="combo.imagen" width="100">
+                                                </td>
+                                                <td>{{ combo.titulo }}</td>
+                                                <td>{{ combo.precio }} Gs.</td>
+                                                <td>{{ combo.cantidad }}</td>
+                                                <!-- <td>
+                                                  <a href="#" class="borrar-combo" data-id="{{ combo.id }}" (click)="eliminarCombo($event)">X</a>
+                                                </td> -->
+                                            </tr>
+                                            <br>
+
+                                            <td colspan="2"></td>
+                                            <td>Total a Pagar:</td>
+                                            <td class="total-price" style="font-weight: bold; font-size: 1.4rem;">{{totalPrice}} Gs</td>
+                                            <!-- <td class="total-price" style="font-weight: bold; font-size: 1.4rem;">${totalPrice.toFixed(2)} Gs</td> -->
+                                            <td></td>
+                                        </tbody>
                                     </table>
 
                                     <!-- <input type="text" id="address-input" placeholder="Ingrese su dirección" style="width: 100%; margin-top: 10px;"> -->
-                                    <a href="/menu" id="vaciar-carrito" class="button u-full-width">Vaciar Carrito</a>
-                                    <a href="/menu" id="confirmar-pedido" class="button u-full-width">Confirmar Pedido</a>
+                                    <a href="#" id="vaciar-carrito" class="button u-full-width" (click)="vaciarCarrito($event)">Vaciar Carrito</a>
+                                    <a href="#" id="confirmar-pedido" class="button u-full-width" (click)="confirmarPedido($event)">Confirmar Pedido</a>
                             </div>
                     </li>
                 </ul>
@@ -97,8 +115,8 @@
                             </div>
                             <div class="info-card">
                                 <h4>{{producto.nombreProducto}}</h4><br>
-                                <p  class="u-pull-right ">{{producto.precioProducto}}</p>
-                                <a *ngIf="userRole === 'Cliente'" href="/menu" class="u-full-width button-primary button input agregar-carrito" data-id="{{producto.idProducto}}">Agregar Al Carrito</a>
+                                <p  class="u-pull-right ">{{producto.precioProducto}} Gs.</p>
+                                <a *ngIf="userRole === 'Cliente'" href="/menu" class="u-full-width button-primary button input agregar-carrito" [attr.data-id]="producto.idProducto" (click)="agregarCombos($event)">Agregar Al Carrito</a>
                             </div>
                         </div>
                     </div>
@@ -114,21 +132,20 @@
         <div class="row">
                 <div class="four columns">
                         <nav id="principal" class="menu">
-                            <a class="enlace" href="#">Para tu Negocio</a>
-                            <a class="enlace" href="#">Conviertete en Instructor</a>
-                            <a class="enlace" href="#">Aplicaciones Móviles</a>
-                            <a class="enlace" href="#">Soporte</a>
-                            <a class="enlace" href="#">Temas</a>
+                            <p>Contacta con nosotros</p>
+                            <p>PedidosOnline.com.py</p>
+                            <p>Asuncion - Paraguay</p>
                         </nav>
                 </div>
                 <div class="four columns">
-                        <nav id="secundaria" class="menu">
-                            <a class="enlace" href="#">¿Quienes Somos?</a>
-                            <a class="enlace" href="#">Empleo</a>
-                            <a class="enlace" href="#">Blog</a>
-                        </nav>
+                    <nav id="secundaria" class="menu">
+                        <a class="enlace" href="#" (click)="toggleAboutUs($event)">Sobre nosotros</a>
+                    </nav>
+                    <div *ngIf="showAboutUsText" class="about-us-text">
+                        {{ aboutUsText }}
+                    </div>
                 </div>
         </div>
     </div>
     
-  </footer>
+</footer>
