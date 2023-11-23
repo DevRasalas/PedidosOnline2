@@ -133,6 +133,12 @@ select {
 	z-index: 1;
 }
 
+.error-message {
+	color: #ff0000; /* Set the text color to red */
+	margin-top: 10px; /* Add some space at the top */
+	font-size: 14px; /* Adjust the font size as needed */
+  }
+
 .container.right-panel-active .sign-up-container {
 	transform: translateX(100%);
 	opacity: 1;

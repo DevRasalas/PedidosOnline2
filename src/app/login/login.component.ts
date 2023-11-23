@@ -1,4 +1,5 @@
 import { Component, EventEmitter, Output } from '@angular/core';
+import { ChangeDetectorRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../auth.service';
 import { Usuario } from './usuario';
@@ -11,12 +12,16 @@ import { LoginServiceService } from '../login-service.service';
   styleUrls: ['./login.component.css']
 })
 export class LoginComponent {
+
+  errorMessage: string | null = null;
+
   isRightPanelActive: boolean = false;
 
   constructor(
     private authService: AuthService, 
     private router: Router,
-    private loginService: LoginServiceService) {}
+    private loginService: LoginServiceService,
+    private cdr: ChangeDetectorRef ) {}
 
   onSignInClick(): void {
     this.isRightPanelActive = false;
@@ -56,10 +61,23 @@ export class LoginComponent {
         this.authService.setUserRole(respuesta.roles);
         this.status.emit(true); // Emit true when login is successful
         this.router.navigate(['/menu']); // Navigate to MenuComponent after
+        this.errorMessage = '';
+        this.cdr.detectChanges(); 
       },
       (   error: any) => {
         console.log('Invalid credentials. Please try again.');
+        
         this.status.emit(false); // Emit false when login fails
+
+        const invalido = document.createElement('P') as HTMLParagraphElement;
+        invalido.textContent = 'Correo o Contraseña inválido';
+        invalido.classList.add('bg-red-600', 'text-white', 'p-2', 'text-center');
+
+        const container = document.getElementById('yourContainerId');
+
+        if (container) {
+          container.appendChild(error);
+        }
       }
     );
   }
@@ -80,7 +98,8 @@ export class LoginComponent {
       (respuesta : any) => {
         this.authService.guardarDatosUsuario(respuesta.roles, respuesta.idUsuario);
         this.authService.setUserRole(respuesta.roles);
-        this.status.emit(true)
+        this.status.emit(true);
+        this.router.navigate(['/menu']);
       },
       (error: any) => {
         console.error('Error en la solicitud de registro:', error);
