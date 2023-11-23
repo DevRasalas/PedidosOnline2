@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { Producto } from 'src/app/producto';
 //import { ChangeDetectorRef } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
@@ -16,8 +16,7 @@ import { Ordenes } from '../ordenes';
 @Component({
   selector: 'app-menu',
   templateUrl: './menu.component.html',
-  styleUrls: ['./menu.component.css', './menu.normalize.css', './menu.skeleton.css'],
-  //changeDetection: ChangeDetectionStrategy.OnPush
+  styleUrls: ['./menu.component.css', './menu.normalize.css', './menu.skeleton.css']
 })
 export class MenuComponent implements OnInit {
   
@@ -26,10 +25,9 @@ export class MenuComponent implements OnInit {
     public productoServicio: ProductoService,
     private router: Router,
     private authService: AuthService,
-    private ordenesService: OrdenesService,
-   // private cdRef: ChangeDetectorRef,
-    private zone: NgZone,
-    private renderer: Renderer2, private el: ElementRef ) {}
+    private ordenesService: OrdenesService ) {}
+
+    @ViewChild('addressInput') addressInput: ElementRef;
 
 ///Implementamos Toma de Ordenes
 enviarOrden() {
@@ -81,6 +79,7 @@ eliminarProducto(productos: Productos) {
   }
 
   imagenUrl: SafeResourceUrl | null;
+  showForm: boolean = false;
   direccionIngresada: string;
   userRole: string = '';
   carrito: any;
@@ -271,110 +270,111 @@ eliminarProducto(productos: Productos) {
   
   
 
-  confirmarPedido(e: Event) {
-    e.preventDefault();
+confirmarPedido(e: Event) {
+  e.preventDefault();
 
-    const header = document.querySelector('#header');
+  if (this.articulosCarrito.length > 0) {
 
-    if (header) {
-      const mensaje = document.createElement('div');
-      mensaje.classList.add('form-container');
-      mensaje.style.textAlign = 'center';
-      mensaje.style.padding = '10px';
-      mensaje.style.marginTop = '10px';
-      mensaje.style.borderRadius = '5px';
+    this.showForm = true;
 
-      if (this.articulosCarrito.length > 0) {
-        // Clear any existing message
-        while (header.firstChild) {
-          header.removeChild(header.firstChild);
-        }
+  } else {
+      // Display a message if the cart is empty
+    this.mostrarMensaje('El carrito está vacío', 'yellow');
+    }
+  // }
+}
 
-        const form = document.createElement('form');
-        form.style.backgroundColor = 'white';
-        form.style.padding = '20px';
-        form.style.borderRadius = '5px';
-        form.style.width = '300px';
-        form.style.margin = 'auto';
-        form.style.display = 'flex';
-        form.style.flexDirection = 'column';
-        form.style.gap = '10px';
 
-        const labelStyle =
-          'font-size: 1.2rem !important; color: rgb(43, 109, 253) !important; font-family: fantasy !important; font-weight: bold !important; margin-bottom: 5px !important;';
-        const inputStyle =
-          'padding: 8px !important; border-radius: 5px !important; border: 1px solid #ddd !important;';
+submitForm() {
+  const addressValue = this.addressInputValue; 
+  console.log('Dirección ingresada:', addressValue);
+  this.enviarOrden();
+  this.articulosCarrito = [];
+  this.limpiarHTML();
+  this.carritoHTML();
+  console.log('Se envió el pedido desde la función submitForm()');
+  this.mostrarMensajeExito();
 
-        form.innerHTML = `
-          <label for="address" style="${labelStyle}">Ingrese su dirección:</label>
-          <input [[ngModel="direccion"]] type="text" id="address" style="${inputStyle}" name="address" >
-        `;
+  this.showForm = false;
+  localStorage.setItem('pedidoRealizado', 'true');
+}
 
-        const submitButton = document.createElement('button');
-        submitButton.textContent = 'Listo';
-        submitButton.style.padding = '10px';
-        submitButton.style.borderRadius = '5px';
-        submitButton.style.backgroundColor = '#4CAF50';
-        submitButton.style.color = 'white';
-        submitButton.style.border = 'none';
-        submitButton.style.cursor = 'pointer';
+get addressInputValue(): string {
+  return this.addressInput.nativeElement.value;
+}
 
-        submitButton.addEventListener('click', (e) => {
-          e.preventDefault();
-          this.enviarOrden();
-          this.articulosCarrito = [];
-          this.limpiarHTML();
-          this.carritoHTML();
-          
-          console.log('Se envio el pedido desde la funcion de confirmarPedido()');
-          form.style.display = 'none';
-          const row = document.createElement('div');
-          row.classList.add('row');
-          const headerContent = document.querySelector('#header-content');
-          if (headerContent) {
-            headerContent.appendChild(row);
-            mensaje.textContent = '¡¡Gracias por su pedido!!';
-            mensaje.style.color = 'white';
-            mensaje.style.backgroundColor = 'green';
-            localStorage.setItem('pedidoRealizado', 'true');
-          }
-        });
 
-        form.appendChild(submitButton);
-        mensaje.style.color = 'black';
-        mensaje.style.backgroundColor = 'white';
+resetHeader() {
 
-        header.appendChild(mensaje);
-        header.appendChild(form);
-      } else {
-        const mensaje = document.createElement('div');
-        mensaje.textContent = 'El carrito está vacío';
-        mensaje.style.color = 'black';
-        mensaje.style.backgroundColor = 'yellow';
-        header.appendChild(mensaje);
-      }
+  this.showForm = false;
+  console.log('Resetting header...');
+  const originalHeaderContent = document.getElementById('header');
+  const header = document.querySelector('#header') as HTMLElement;
 
-      const pedidoRealizado = localStorage.getItem('pedidoRealizado');
-      if (pedidoRealizado === 'true') {
-        const row = document.createElement('div');
-        row.classList.add('row');
-        const headerContent = document.querySelector('#header-content');
-        if (headerContent) {
-          headerContent.appendChild(row);
-          mensaje.textContent = '¡¡Gracias por su pedido!!';
-          mensaje.style.color = 'white';
-          mensaje.style.backgroundColor = 'green';
-        }
-      }
+  if (originalHeaderContent && header) {
+    // Remove existing content
+    while (header.firstChild) {
+      header.removeChild(header.firstChild);
+    }
 
-      // Remove the message after 3 seconds
-      setTimeout(() => {
+    // Append cloned content back to the header
+    header.appendChild(originalHeaderContent.cloneNode(true) as Node);
+  }
+}
+
+
+
+mostrarMensajeExito() {
+  const header = document.querySelector('#header');
+  const headerContent = document.querySelector('#header-content');
+
+  if (header && headerContent) {
+    const mensaje = document.createElement('div');
+    mensaje.classList.add('form-container');
+    mensaje.style.textAlign = 'center';
+    mensaje.style.padding = '10px';
+    mensaje.style.marginTop = '10px';
+    mensaje.style.borderRadius = '5px';
+
+    const row = document.createElement('div');
+    row.classList.add('row');
+
+    headerContent.appendChild(row);
+    mensaje.textContent = '¡¡Gracias por su pedido!!';
+    mensaje.style.color = 'white';
+    mensaje.style.backgroundColor = 'green';
+    header.appendChild(mensaje);
+
+    // Remove the message after 3 seconds
+    setTimeout(() => {
+      if (header.contains(mensaje)) {
         header.removeChild(mensaje);
         localStorage.removeItem('pedidoRealizado');
-      }, 3000);
-    }
-    
+      }
+    }, 3000);
   }
+}
+
+
+mostrarMensaje(mensajeText: string, backgroundColor: string) {
+  const header = document.querySelector('#header');
+
+  if (header) {
+    const mensaje = document.createElement('div');
+    mensaje.textContent = mensajeText;
+    mensaje.style.color = 'black';
+    mensaje.style.backgroundColor = backgroundColor;
+    header.appendChild(mensaje);
+
+    // Remove the message after 3 seconds
+    setTimeout(() => {
+      if (header.contains(mensaje)) {
+        header.removeChild(mensaje);
+      }
+      // localStorage.removeItem('pedidoRealizado');
+    }, 3000);
+  }
+}
 
 
 
@@ -497,9 +497,9 @@ eliminarProducto(productos: Productos) {
       this.montoTotalProd = totalComboPrice;
       this.sincronizarStorage();
 
-      //this.zone.run(() => {
-        //  this.cdRef.detectChanges(); 
-      //});
+      // this.zone.run(() => {
+      //     this.cdRef.detectChanges(); 
+      // });
   }
 
 

@@ -53,6 +53,15 @@
             </div>
         </div> 
     </div>
+
+    <div *ngIf="showForm">
+        <form style="background-color: white; padding: 20px; border-radius: 5px; width: 300px; margin: auto; display: flex; flex-direction: column; gap: 10px;">
+          <label for="address" style="font-size: 1.2rem !important; color: rgb(43, 109, 253) !important; font-family: fantasy !important; font-weight: bold !important; margin-bottom: 5px !important;">Ingrese su dirección:</label>
+          <input #addressInput type="text" id="address" style="padding: 8px !important; border-radius: 5px !important; border: 1px solid #ddd !important;" name="address">
+          <button (click)="submitForm()" style="padding: 10px; border-radius: 5px; background-color: #4CAF50; color: white; border: none; cursor: pointer;">Listo</button>
+        </form>
+    </div>
+
 </header>
 
 
