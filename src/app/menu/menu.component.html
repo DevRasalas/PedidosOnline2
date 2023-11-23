@@ -69,18 +69,16 @@
     <table *ngIf="mostrarHistorialPedidos" class="table table-responsive table-striped">
         <thead>
           <tr>
-            <th>ID Orden</th>
             <th>Total</th>
             <th>Fecha</th>
             <th>Dirección</th>
           </tr>
         </thead>
         <tbody>
-          <tr> <!-- *ngFor="let order of orderHistory" -->
-            <td> order.id_orden </td>
-            <td> order.total </td>
-            <td> order.fecha </td>
-            <td> order.direccion </td>
+          <tr *ngFor="let order of listaOrdenes"> <!-- *ngFor="let order of orderHistory" -->
+            <td> {{order.montoTotal}} </td>
+            <td> {{order.fechaCompra}} </td>
+            <td> {{order.direccion}} </td>
             <td> <a href="">Detalles</a> </td>
           </tr>
         </tbody>

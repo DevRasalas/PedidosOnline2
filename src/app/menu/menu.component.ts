@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { Producto } from 'src/app/producto';
-import { ChangeDetectorRef } from '@angular/core';
+//import { ChangeDetectorRef } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ProductoService } from '../producto.service';
 import { AuthService } from '../auth.service';
@@ -9,15 +9,15 @@ import { Router } from '@angular/router';
 import { Productos } from '../productos';
 import { OrdenesService } from './ordenes.service';
 import { OrdenConProducto } from '../orden-con-producto';
-import { ChangeDetectionStrategy } from '@angular/core';
 import { NgZone } from '@angular/core';
 import { Renderer2, ElementRef } from '@angular/core';
+import { Ordenes } from '../ordenes';
 
 @Component({
   selector: 'app-menu',
   templateUrl: './menu.component.html',
   styleUrls: ['./menu.component.css', './menu.normalize.css', './menu.skeleton.css'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  //changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MenuComponent implements OnInit {
   
@@ -27,7 +27,7 @@ export class MenuComponent implements OnInit {
     private router: Router,
     private authService: AuthService,
     private ordenesService: OrdenesService,
-    private cdRef: ChangeDetectorRef,
+   // private cdRef: ChangeDetectorRef,
     private zone: NgZone,
     private renderer: Renderer2, private el: ElementRef ) {}
 
@@ -35,7 +35,7 @@ export class MenuComponent implements OnInit {
 enviarOrden() {
     const ordenConProducto: OrdenConProducto = {
       orden: {
-        idUsuario: this.authService.obtenerIdUsuario() || '0',
+        idUsuario: this.authService.obtenerIdUsuario() || '1',
         direccion: "Zeballos-Kue",
         montoTotal: this.montoTotalProd
       },
@@ -98,11 +98,25 @@ eliminarProducto(productos: Productos) {
   productos2 : Productos [] = [];
   montoTotalProd : number = 0;
   totalPrice: number = 0;
+  listaOrdenes : Ordenes[] = [];
   toggleVista(): void {
     this.mostrarHistorialPedidos = !this.mostrarHistorialPedidos;
     // Aquí puedes realizar otras acciones necesarias al cambiar la vista
+    this.mostrarOrdenes()
   }
-
+  mostrarOrdenes(){
+    this.ordenesService.mostrarOrdenes(this.authService.obtenerIdUsuario()).subscribe(
+      (datos : any) => {
+        this.listaOrdenes = datos;
+        this.listaOrdenes.forEach(element => {
+          console.log(element.fechaCompra);
+          console.log(element.direccion);
+        });
+      }
+      
+    );
+    
+  }
   @ViewChild('miFormulario') miFormulario: NgForm;
   ngOnInit() {
     this.userRole = this.authService.getUserRole();
@@ -131,7 +145,7 @@ eliminarProducto(productos: Productos) {
   /*
     Aqui creamos la funcion onSubmit
   */
-  
+  /* Aqui va todo lo de obtener y mostrar productos */
     onSubmit(){
       this.subir().then(() => {
         this.obtenerProductos();
@@ -166,6 +180,7 @@ eliminarProducto(productos: Productos) {
       })
     );
   }
+  /*Aqui finalizad todo lo de obtener y mostrar productos*/
   cargarEventListeners() {
     if (this.listarCombos) {
       this.listarCombos.addEventListener('click', this.agregarCombos.bind(this));
@@ -220,6 +235,12 @@ eliminarProducto(productos: Productos) {
 
             if (existingProduct) {
                 existingProduct.cantidad++;
+                
+                const productoEnCarro = this.productos2.find(producto => producto.idProducto === idNormal);
+                if (productoEnCarro) {
+                  productoEnCarro.cantidad++;
+                }
+                console.log("La cantidad de productos es: "+existingProduct.cantidad);
             } else {
                 const infoCombo = {
                     imagen: comboSeleccionado.urlImagen,
@@ -286,7 +307,7 @@ eliminarProducto(productos: Productos) {
 
         form.innerHTML = `
           <label for="address" style="${labelStyle}">Ingrese su dirección:</label>
-          <input type="text" id="address" style="${inputStyle}" name="address" >
+          <input [[ngModel="direccion"]] type="text" id="address" style="${inputStyle}" name="address" >
         `;
 
         const submitButton = document.createElement('button');
@@ -304,6 +325,7 @@ eliminarProducto(productos: Productos) {
           this.articulosCarrito = [];
           this.limpiarHTML();
           this.carritoHTML();
+          
           console.log('Se envio el pedido desde la funcion de confirmarPedido()');
           form.style.display = 'none';
           const row = document.createElement('div');
@@ -472,11 +494,12 @@ eliminarProducto(productos: Productos) {
       });
 
       this.totalPrice = totalComboPrice; 
+      this.montoTotalProd = totalComboPrice;
       this.sincronizarStorage();
 
-      this.zone.run(() => {
-          this.cdRef.detectChanges(); 
-      });
+      //this.zone.run(() => {
+        //  this.cdRef.detectChanges(); 
+      //});
   }
 
 

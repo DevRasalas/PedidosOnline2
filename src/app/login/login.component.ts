@@ -22,7 +22,7 @@ export class LoginComponent {
     private router: Router,
     private loginService: LoginServiceService,
     private cdr: ChangeDetectorRef ) {}
-
+   
   onSignInClick(): void {
     this.isRightPanelActive = false;
     this.onSubmit();
